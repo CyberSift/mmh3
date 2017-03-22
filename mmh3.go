@@ -13,13 +13,14 @@ const (
 	h64c2 uint64 = 0x4cf5ad432745937f
 )
 
-func Hash32(key []byte) uint32 {
+func Hash32(key []byte, seed uint32) uint32 {
 	length := len(key)
 	if length == 0 {
 		return 0
 	}
 	nblocks := length / 4
 	var h, k uint32
+	h = seed
 	for i := 0; i < nblocks; i++ {
 		k = binary.LittleEndian.Uint32(key[i*4:])
 		k *= h32c1
@@ -54,7 +55,7 @@ func Hash32(key []byte) uint32 {
 	return h
 }
 
-func Hash128(key []byte) []byte {
+func Hash128(key []byte, seed uint64) []byte {
 	length := len(key)
 	ret := make([]byte, 16)
 	if length == 0 {
@@ -62,6 +63,8 @@ func Hash128(key []byte) []byte {
 	}
 	nblocks := length / 16
 	var h1, h2, k1, k2 uint64
+	h1 = seed
+	h2 = seed
 	for i := 0; i < nblocks; i++ {
 		k1 = binary.LittleEndian.Uint64(key[i*16:])
 		k2 = binary.LittleEndian.Uint64(key[(i*16)+8:])
@@ -160,7 +163,7 @@ func Hash128(key []byte) []byte {
 // Hash128x64 is a version of MurmurHash which is designed to run only on
 // little-endian processors.  It is considerably faster for those processors
 // than Hash128.
-func Hash128x64(key []byte) []byte {
+func Hash128x64(key []byte, seed uint64) []byte {
 	length := len(key)
 	ret := make([]byte, 16)
 	if length == 0 {
@@ -177,6 +180,8 @@ func Hash128x64(key []byte) []byte {
 	b := *(*[]uint64)(unsafe.Pointer(&h))
 	for i := 0; i < len(b); i += 2 {
 		k1, k2 = b[i], b[i+1]
+		h1 ^= seed
+		h2 ^= seed
 		k1 *= h64c1
 		k1 = (k1 << 31) | (k1 >> (64 - 31))
 		k1 *= h64c2
