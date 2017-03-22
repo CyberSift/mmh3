@@ -174,14 +174,13 @@ func Hash128x64(key []byte, seed uint64) []byte {
 
 	nblocks := length / 16
 	var h1, h2, k1, k2 uint64
-
+	h1 = seed
+	h2 = seed
 	h := *(*reflect.SliceHeader)(unsafe.Pointer(&key))
 	h.Len = nblocks * 2
 	b := *(*[]uint64)(unsafe.Pointer(&h))
 	for i := 0; i < len(b); i += 2 {
 		k1, k2 = b[i], b[i+1]
-		h1 ^= seed
-		h2 ^= seed
 		k1 *= h64c1
 		k1 = (k1 << 31) | (k1 >> (64 - 31))
 		k1 *= h64c2
